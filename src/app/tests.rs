@@ -27,6 +27,7 @@ mod startup;
 mod switch_repeat;
 mod switching;
 mod tear_regressions;
+mod workspace_order;
 use crate::{BindingState, Slot, SlotId};
 
 use super::*;

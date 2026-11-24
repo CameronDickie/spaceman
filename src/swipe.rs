@@ -10,12 +10,29 @@ const DOMINANCE: f64 = 2.0;
 /// A gap this long between frames means the swipe's end was missed.
 const STALE_SECONDS: f64 = 0.5;
 
-/// Which way the fingers moved. Like macOS Spaces, swiping left goes to the
-/// next workspace and swiping right to the previous one.
+/// Which way the workspace strip moves, like macOS Spaces. With natural
+/// scrolling (the macOS default) the fingers drag the strip, so moving them
+/// left goes to the next workspace; without it they move the view, so moving
+/// them right does. See [`Swipe::for_scroll_direction`].
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Swipe {
+    /// Go to the next workspace.
     Left,
+    /// Go to the previous workspace.
     Right,
+}
+
+impl Swipe {
+    /// Maps the fingers' direction to a workspace direction under the system
+    /// scroll-direction preference, so swipes follow macOS Spaces either way.
+    #[must_use]
+    pub fn for_scroll_direction(self, natural: bool) -> Self {
+        match (self, natural) {
+            (swipe, true) => swipe,
+            (Swipe::Left, false) => Swipe::Right,
+            (Swipe::Right, false) => Swipe::Left,
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -86,6 +103,14 @@ impl SwipeTracker {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn swipes_follow_the_system_scroll_direction() {
+        assert_eq!(Swipe::Left.for_scroll_direction(true), Swipe::Left);
+        assert_eq!(Swipe::Right.for_scroll_direction(true), Swipe::Right);
+        assert_eq!(Swipe::Left.for_scroll_direction(false), Swipe::Right);
+        assert_eq!(Swipe::Right.for_scroll_direction(false), Swipe::Left);
+    }
 
     fn fingers(x: f64, y: f64, count: usize) -> Vec<(f64, f64)> {
         (0..count)

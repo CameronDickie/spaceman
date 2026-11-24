@@ -14,7 +14,21 @@ use objc2_core_graphics::{
     CGEventTapPlacement, CGEventTapProxy, CGEventType, CGMouseButton,
 };
 
+use objc2_foundation::{NSUserDefaults, ns_string};
+
 use crate::swipe::{Swipe, SwipeTracker};
+
+/// Whether macOS scrolls naturally (System Settings › Trackpad › Natural
+/// scrolling), which also sets the direction of the Spaces swipe. Read on
+/// every swipe so a change applies at once; a missing value is the macOS
+/// default, natural.
+pub fn natural_scrolling() -> bool {
+    autoreleasepool(|_| {
+        let defaults = NSUserDefaults::standardUserDefaults();
+        let key = ns_string!("com.apple.swipescrolldirection");
+        defaults.objectForKey(key).is_none() || defaults.boolForKey(key)
+    })
+}
 
 /// A gap this long between gesture frames means the lift was missed (matches
 /// `crate::swipe::SwipeTracker`).

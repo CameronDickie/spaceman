@@ -22,6 +22,7 @@ Switch workspace                                           // ws.switch
 
 Swipe                                                      // ws.swipe
 ├── Three-finger swipe left/right -> next/previous workspace in the menu section of the display
+│   (reversed when Natural scrolling is off, matching macOS Spaces)
 │   under the pointer (visible + occupied, in workspace order), stops at either end
 └── Suppressed while a pointer button is down or a window drag is active (including macOS
     Accessibility "Three Finger Drag")
@@ -150,7 +151,8 @@ Keyboard (while tiling is enabled)
 ├── Option+Shift+<1..0 | A..Z>  -> move focused window
 ├── Option+Tab                  -> back-and-forth (last two workspaces focused, any display)
 └── Option+Shift+Tab            -> move focused workspace to next display
-Trackpad: three-finger swipe left/right -> next/previous workspace (turn macOS's three-finger
+Trackpad: three-finger swipe -> next/previous workspace, in the Spaces direction set by Natural
+          scrolling (turn macOS's three-finger
           "Swipe between full-screen applications" off or move it to four fingers)
 CLI: spaceman ctl switch | back-and-forth | move-workspace | move | move-app
 Config: ~/Library/Application Support/Spaceman/config.toml -> [[rules]], [[workspaces]],

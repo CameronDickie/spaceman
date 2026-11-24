@@ -44,7 +44,7 @@ pub use presenter::{
     AppSink, AxBackend, EnhancedUi, InteractivePresenter, PresenterBackend, PresenterStats,
     WriteOutcome,
 };
-pub use swipes::SwipeMonitor;
+pub use swipes::{SwipeMonitor, natural_scrolling};
 
 use apply::{cache_managed_window, evict_managed_app, prune_managed_app};
 use ax::{

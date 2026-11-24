@@ -265,6 +265,7 @@ impl MainThreadAgent {
         if self.swipes.is_none() {
             let sender = self.actions_sender.clone();
             match macos::SwipeMonitor::install(move |swipe, point| {
+                let swipe = swipe.for_scroll_direction(macos::natural_scrolling());
                 drop(sender.send(Action::Worker(WorkerAction::Swipe(swipe, point))));
             }) {
                 Ok(monitor) => self.swipes = Some(monitor),

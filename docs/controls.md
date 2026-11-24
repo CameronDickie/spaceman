@@ -25,8 +25,10 @@ fails after the old registrations are released, it pauses and reports `Hotkeys u
 | Three-finger swipe left/right | Next/previous workspace on the display under the pointer |
 
 A three-finger horizontal swipe steps through the workspaces that the display's menu section lists
-(the visible one and every one holding windows), stopping at either end. Swiping left goes to the
-next one, as with macOS Spaces. Spaceman only listens to the trackpad, so macOS still acts on the
+(the visible one and every one holding windows), stopping at either end. The direction follows
+macOS Spaces and the Natural scrolling setting: with it on (the default), swiping left goes to the
+next one; with it off, swiping right does. A change to the setting applies to the next swipe.
+Spaceman only listens to the trackpad, so macOS still acts on the
 same swipe: set "Swipe between full-screen applications" to four fingers or off in Trackpad
 settings. Four-finger swipes and vertical swipes are left to macOS.
 

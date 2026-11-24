@@ -256,6 +256,8 @@ pub(crate) fn ctl_help(executable: &str) -> String {
         "  fullscreen                 Toggle Fullscreen Layout on the active workspace",
         "  float                      Float the focused window above the tiles, or tile it again",
         "  resize <shrink|grow>       Adjust the focused window's layout weight",
+        "  resize <width|height> <points>",
+        "                             Resize the focused window to that width or height",
         "  balance                    Equalize the focused tile's immediate split",
         "  retile                     Force a fresh observation and retile",
         "",

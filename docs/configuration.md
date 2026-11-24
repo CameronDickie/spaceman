@@ -25,7 +25,8 @@ The complete example is [config.example.toml](../config.example.toml).
 ## Current Schema
 
 The parser rejects unknown fields. The root must contain `version = 1` and may contain an optional
-`[settings]` table plus repeated `[[rules]]` and `[[workspaces]]` tables.
+`[settings]` table, an optional `[shortcuts]` table (see [Shortcuts](#shortcuts)), plus repeated
+`[[rules]]` and `[[workspaces]]` tables.
 
 ```toml
 version = 1
@@ -110,6 +111,63 @@ spaceman config set gaps.top 32
 spaceman config set single_window_max_width 1680
 spaceman config get gaps.inner
 ```
+
+## Shortcuts
+
+`[shortcuts]` rebinds Spaceman's global shortcuts. Each entry in `[shortcuts.bindings]` maps a chord
+to a command in `spaceman ctl` syntax:
+
+```toml
+[shortcuts]
+defaults = true                       # optional (default: true); false registers only these bindings
+
+[shortcuts.bindings]
+"alt+left" = "move-direction left"
+"alt+shift+ctrl+left" = "focus left"
+"alt+v" = "float"
+"alt+j" = "layout"                    # replaces the built-in Option+J (focus down)
+"alt+shift+b" = "balance"
+"alt+h" = "none"                      # unbinds the built-in Option+H
+```
+
+A chord is one or more modifiers and one key, joined by `+`, in any order and case:
+
+- modifiers: `alt` (also `opt`, `option`), `cmd` (`command`), `ctrl` (`control`), and `shift`.
+  Every chord needs `alt`, `cmd`, or `ctrl`.
+- keys: a single character such as `j`, `/`, `-`, `=`, or `` ` `` (found on whatever key types it in
+  the active keyboard layout, like the built-in shortcuts); `1` through `9` and `0` (the physical
+  number row, so `0` is workspace 10); `left`, `right`, `up`, `down`, `return` (`enter`), `tab`,
+  `space`, `escape` (`esc`), `backspace` (`delete`), `forwarddelete`, `home`, `end`, `pageup`,
+  `pagedown`, and `f1` through `f12`. `alt++` is the `+` key.
+
+Commands:
+
+| Command | Action |
+| --- | --- |
+| `switch WORKSPACE` | Switch to workspace 1 through 10 or an enabled named workspace A through Z |
+| `move WORKSPACE` | Move the focused window there without switching |
+| `back-and-forth` | Return to the previous workspace |
+| `move-workspace [next\|prev\|DISPLAY]` | Move the focused workspace to another display |
+| `focus left\|down\|up\|right` | Focus the nearest tile in that direction |
+| `focus next` | Focus the next tiled window in the workspace |
+| `move-direction left\|down\|up\|right` | Move the focused tile in that direction |
+| `layout` | Toggle the active layout's root split axis |
+| `fullscreen` | Toggle Fullscreen Layout |
+| `float` | Float the focused window, or tile it again |
+| `resize shrink\|grow` | Shrink or grow the focused tile |
+| `balance` | Reset the active workspace's split weights |
+| `retile` | Retile now |
+| `none` | Unbind the chord: no built-in shortcut claims it |
+
+Bindings claim their chords before the built-in shortcuts, so a binding on a built-in chord replaces
+it and the other built-ins stay. With `defaults = false` only the listed bindings register, and the
+table must bind at least one command (tiling needs at least one shortcut to start). Two spellings of
+the same chord, an unknown modifier, key, or command, or a chord without `alt`, `cmd`, or `ctrl` is a
+config error. A binding whose workspace is not enabled, or that the keyboard layout cannot type, is
+skipped and logged in `agent.log` while the other shortcuts register.
+
+Shortcut changes take effect the next time Spaceman starts (`spaceman ctl restart`); rules, displays,
+and the HUD still reload live. Settings › Shortcuts lists the built-in shortcuts.
 
 ## Remembered Placements
 

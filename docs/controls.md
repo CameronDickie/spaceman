@@ -29,6 +29,9 @@ next one, as with macOS Spaces. Spaceman only listens to the trackpad, so macOS 
 same swipe: set "Swipe between full-screen applications" to four fingers or off in Trackpad
 settings. Four-finger swipes and vertical swipes are left to macOS.
 
+Every shortcut above can be rebound, unbound, or replaced in the config file's `[shortcuts]` table;
+see [Configuration › Shortcuts](configuration.md#shortcuts). The table lists the built-in defaults.
+
 Named workspace shortcuts are registered only when referenced by config. If a configured letter
 overlaps a built-in shortcut, the workspace shortcut takes precedence.
 

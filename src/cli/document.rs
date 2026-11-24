@@ -1,5 +1,5 @@
 use std::{
-    collections::BTreeSet,
+    collections::{BTreeMap, BTreeSet},
     fs,
     path::{Path, PathBuf},
 };
@@ -22,6 +22,18 @@ pub(crate) struct ConfigDoc {
     pub rules: Vec<RuleDoc>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub workspaces: Vec<WorkspaceDoc>,
+    /// `[shortcuts]`, carried through untouched: no CLI command edits it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub shortcuts: Option<ShortcutsDoc>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct ShortcutsDoc {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub defaults: Option<bool>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub bindings: BTreeMap<String, String>,
 }
 
 impl Default for ConfigDoc {
@@ -31,6 +43,7 @@ impl Default for ConfigDoc {
             settings: SettingsDoc::default(),
             rules: Vec::new(),
             workspaces: Vec::new(),
+            shortcuts: None,
         }
     }
 }

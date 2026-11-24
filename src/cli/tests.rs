@@ -661,6 +661,9 @@ fn edits_preserve_other_sections_and_named_rule_workspaces_appear_in_list() {
         parsed.disposition("com.granola.app", &sample_window(None)),
         WindowDisposition::Ignored
     );
+    // The example's [shortcuts] table survives every edit above.
+    assert!(parsed.shortcuts().defaults);
+    assert_eq!(parsed.shortcuts().bindings.len(), 5);
 
     // Named workspace W (only referenced by a rule) appears in workspaces list with default main
     let workspaces: Value = serde_json::from_str(

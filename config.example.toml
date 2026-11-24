@@ -60,3 +60,16 @@ monitor = "main"
 [[workspaces]]
 workspace = "D"
 monitor = "main"
+
+# Shortcuts are optional. Bindings use `spaceman ctl` commands and replace the
+# built-in shortcut on the same chord; "none" unbinds one. Set defaults = false
+# to register only these bindings. Changes apply on the next start.
+[shortcuts]
+defaults = true
+
+[shortcuts.bindings]
+"alt+left" = "move-direction left"
+"alt+right" = "move-direction right"
+"alt+shift+ctrl+left" = "focus left"
+"alt+shift+ctrl+right" = "focus right"
+"alt+shift+b" = "balance"

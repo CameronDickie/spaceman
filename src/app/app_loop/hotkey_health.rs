@@ -44,7 +44,7 @@ impl MainThreadAgent {
                 "hotkey: {description} pressed but macOS did not deliver it; registering shortcuts again"
             );
             self.last_hotkey_heal = Some(Instant::now());
-            match HotkeyPlan::current(&self.hotkey_workspaces) {
+            match HotkeyPlan::current(&self.hotkey_workspaces, &self.shortcuts) {
                 Ok(plan) => self.reinstall_hotkeys(plan),
                 Err(error) => log_event!("hotkeys: could not plan shortcuts: {error}"),
             }
@@ -61,6 +61,9 @@ impl MainThreadAgent {
         match Hotkeys::install(self.actions_sender.clone(), plan) {
             Ok(hotkeys) => {
                 log_event!("hotkeys: registered {} shortcuts", hotkeys.len());
+                for skipped in hotkeys.skipped() {
+                    log_event!("hotkeys: {skipped}");
+                }
                 self.hotkeys = Some(hotkeys);
                 self.last_error = None;
                 self.ui_dirty = true;

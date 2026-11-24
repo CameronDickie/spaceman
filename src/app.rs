@@ -330,6 +330,7 @@ pub struct PreparedAgent {
     cancelled: Arc<AtomicBool>,
     scope: ManagementScope,
     hotkey_workspaces: Vec<WorkspaceId>,
+    shortcuts: crate::shortcuts::Shortcuts,
     hud: bool,
     controls: Receiver<ControlRequest>,
     control_server: control::Server,
@@ -348,6 +349,7 @@ pub fn prepare() -> Result<(PreparedAgent, UiBridge), String> {
     let (config, workspace_state) =
         recover_startup_metadata(Config::load(), load_workspace_state());
     let hud = config.hud();
+    let shortcuts = config.shortcuts().clone();
     let mut configured_workspaces = Workspaces::default();
     config.configure_workspaces(&mut configured_workspaces);
     let mut hotkey_workspaces = WorkspaceId::numbered()
@@ -394,6 +396,7 @@ pub fn prepare() -> Result<(PreparedAgent, UiBridge), String> {
             cancelled,
             scope,
             hotkey_workspaces,
+            shortcuts,
             hud,
             controls,
             control_server,
@@ -455,6 +458,7 @@ impl PreparedAgent {
                 scope: self.scope,
                 events,
                 hotkey_workspaces: self.hotkey_workspaces,
+                shortcuts: self.shortcuts,
                 hud: self.hud,
                 trusted,
                 setup_tour_open,

@@ -76,6 +76,8 @@ pub(super) struct AppLoopInit {
     pub(super) scope: ManagementScope,
     pub(super) events: macos::WindowEventMonitor,
     pub(super) hotkey_workspaces: Vec<WorkspaceId>,
+    /// `[shortcuts]` as loaded at startup; changes apply on the next start.
+    pub(super) shortcuts: crate::shortcuts::Shortcuts,
     pub(super) hud: bool,
     pub(super) trusted: bool,
     /// A first-run setup tour is open and holds automatic tiling until it ends.
@@ -95,6 +97,7 @@ pub struct MainThreadAgent {
     scope: ManagementScope,
     events: macos::WindowEventMonitor,
     hotkey_workspaces: Vec<WorkspaceId>,
+    shortcuts: crate::shortcuts::Shortcuts,
     controls: Receiver<ControlRequest>,
     _control_server: control::Server,
     bridge: UiBridge,
@@ -151,11 +154,14 @@ impl MainThreadAgent {
     ) -> Self {
         let trusted = init.trusted;
         let (hotkeys, hotkey_error) = if trusted {
-            match HotkeyPlan::current(&init.hotkey_workspaces)
+            match HotkeyPlan::current(&init.hotkey_workspaces, &init.shortcuts)
                 .and_then(|plan| Hotkeys::install(init.actions_sender.clone(), plan))
             {
                 Ok(hotkeys) => {
                     log_event!("hotkeys: registered {} shortcuts", hotkeys.len());
+                    for skipped in hotkeys.skipped() {
+                        log_event!("hotkeys: {skipped}");
+                    }
                     (Some(hotkeys), None)
                 }
                 Err(error) => (None, Some(format!("Hotkeys unavailable: {error}"))),
@@ -190,6 +196,7 @@ impl MainThreadAgent {
             scope: init.scope,
             events: init.events,
             hotkey_workspaces: init.hotkey_workspaces,
+            shortcuts: init.shortcuts,
             controls: init.controls,
             _control_server: init.control_server,
             bridge: init.bridge,

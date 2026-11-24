@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     DisplaySelector, ObservedWindow, WorkspaceId, Workspaces,
+    shortcuts::{RawShortcuts, Shortcuts},
     spacing::{Spacing, SpacingKey},
 };
 
@@ -91,6 +92,7 @@ pub struct Config {
     settings: AppSettings,
     rules: Vec<WindowRule>,
     workspace_monitors: Vec<(WorkspaceId, DisplaySelector)>,
+    shortcuts: Shortcuts,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -125,6 +127,8 @@ struct RawConfig {
     rules: Vec<RawWindowRule>,
     #[serde(default)]
     workspaces: Vec<RawWorkspace>,
+    #[serde(default)]
+    shortcuts: RawShortcuts,
 }
 
 #[derive(Deserialize)]
@@ -271,7 +275,14 @@ impl Config {
             },
             rules,
             workspace_monitors,
+            shortcuts: raw.shortcuts.parse()?,
         })
+    }
+
+    /// The `[shortcuts]` table: user bindings and whether built-in shortcuts stay.
+    #[must_use]
+    pub const fn shortcuts(&self) -> &Shortcuts {
+        &self.shortcuts
     }
 
     #[must_use]
@@ -473,6 +484,9 @@ struct EditableConfig {
     rules: Vec<EditableRule>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     workspaces: Vec<EditableWorkspace>,
+    /// Carried through untouched; Settings never edits shortcuts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    shortcuts: Option<toml::Table>,
 }
 
 impl Default for EditableConfig {
@@ -482,6 +496,7 @@ impl Default for EditableConfig {
             settings: EditableSettings::default(),
             rules: Vec::new(),
             workspaces: Vec::new(),
+            shortcuts: None,
         }
     }
 }
@@ -873,5 +888,52 @@ right = 128
         assert_eq!(saved.spacing().left, 20);
         assert_eq!(saved.spacing().single_window_max_width, 1440);
         drop(std::fs::remove_dir_all(dir));
+    }
+
+    #[test]
+    fn saving_a_workspace_monitor_keeps_shortcuts() {
+        let dir = std::env::temp_dir().join(format!(
+            "spaceman-config-shortcuts-{}-{}",
+            std::process::id(),
+            now().as_nanos()
+        ));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("config.toml");
+        std::fs::write(
+            &path,
+            "version = 1\n[shortcuts]\ndefaults = false\n[shortcuts.bindings]\n\"alt+left\" = \"move-direction left\"\n",
+        )
+        .unwrap();
+        let saved = save_workspace_monitor_at(&path, WorkspaceId::TWO, &DisplaySelector::Secondary)
+            .unwrap();
+        assert!(!saved.shortcuts().defaults);
+        assert_eq!(saved.shortcuts().bindings.len(), 1);
+        drop(std::fs::remove_dir_all(dir));
+    }
+
+    #[test]
+    fn shortcuts_default_to_built_ins_and_reject_bad_bindings() {
+        assert_eq!(
+            Config::parse("version = 1").unwrap().shortcuts(),
+            &crate::shortcuts::Shortcuts::default()
+        );
+        for (source, message) in [
+            (
+                "[shortcuts.bindings]\n\"super+q\" = \"float\"",
+                "unknown modifier",
+            ),
+            (
+                "[shortcuts.bindings]\n\"alt+q\" = \"close\"",
+                "unknown command",
+            ),
+            (
+                "[shortcuts]\ndefaults = false",
+                "needs at least one binding",
+            ),
+            ("[shortcuts]\nmode = \"replace\"", "unknown field"),
+        ] {
+            let error = Config::parse(&format!("version = 1\n{source}")).unwrap_err();
+            assert!(error.contains(message), "{source}: {error}");
+        }
     }
 }

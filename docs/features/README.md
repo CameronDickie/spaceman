@@ -25,6 +25,7 @@ secondary-display workspaces ships in the notarized preview at
 | Parking exemption, remembered placements (`window-memory.json`), arrangement journal, `spaceman doctor` | Preview artifact and source builds |
 | Single-process Rune Settings (`Activity`), three-step setup tour, non-activating Workspace HUD (`[settings] hud`) | Preview artifact and source builds |
 | Named workspaces A-Z | Opt-in: enabled by a `route` rule or `[[workspaces]]` entry |
+| Custom shortcuts (`[shortcuts]`) | Source builds after this change; rebind, unbind, or replace the built-in keys in `config.toml`, applied at startup. Covered by unit tests in `src/shortcuts.rs`, `src/hotkeys.rs`, and `src/config.rs`; no live harness exercises a rebound chord yet |
 | Secondary-display workspaces 6-10 | Require a second display; with one display they fall back to `main` |
 | Three or more displays | Assign workspaces in Settings › Workspaces (each display past `secondary` by UUID) or with `[[workspaces]] monitor = "<uuid>"` |
 

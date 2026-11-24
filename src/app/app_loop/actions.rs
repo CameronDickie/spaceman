@@ -17,11 +17,14 @@ impl MainThreadAgent {
         }
         self.awaiting_accessibility = false;
         if self.hotkeys.is_none() {
-            match HotkeyPlan::current(&self.hotkey_workspaces)
+            match HotkeyPlan::current(&self.hotkey_workspaces, &self.shortcuts)
                 .and_then(|plan| Hotkeys::install(self.actions_sender.clone(), plan))
             {
                 Ok(registered) => {
                     log_event!("hotkeys: registered {} shortcuts", registered.len());
+                    for skipped in registered.skipped() {
+                        log_event!("hotkeys: {skipped}");
+                    }
                     self.hotkeys = Some(registered);
                     self.hotkey_delivery.clear();
                 }

@@ -936,4 +936,26 @@ right = 128
             assert!(error.contains(message), "{source}: {error}");
         }
     }
+
+    /// A global shortcut fires in every app, so a chord without cmd, ctrl, or alt would eat
+    /// ordinary typing. Unbinding is the only exception, and it never registers a chord.
+    #[test]
+    fn shortcuts_never_bind_a_plain_or_shift_only_key() {
+        for chord in [
+            "\"h\"",
+            "\"shift+h\"",
+            "\"shift+left\"",
+            "\"shift+/\"",
+            "\"shift+1\"",
+            "\"space\"",
+        ] {
+            let source = format!("version = 1\n[shortcuts.bindings]\n{chord} = \"float\"");
+            let error = Config::parse(&source).unwrap_err();
+            assert!(
+                error.contains("needs at least one of alt, cmd, or ctrl"),
+                "{chord}: {error}"
+            );
+        }
+        assert!(Config::parse("version = 1\n[shortcuts.bindings]\n\"alt+h\" = \"none\"").is_ok());
+    }
 }

@@ -615,7 +615,13 @@ fn workspaces_rejects_invalid_inputs() {
 #[test]
 fn edits_preserve_other_sections_and_named_rule_workspaces_appear_in_list() {
     let temp = TempConfig::new("preserve");
-    temp.write(include_str!("../../config.example.toml"));
+    // The example leaves `[shortcuts]` commented out so copying it changes nothing; add one
+    // here so every edit below has to carry a real table through untouched.
+    let mut source = include_str!("../../config.example.toml").to_owned();
+    source.push_str(
+        "\n[shortcuts]\ndefaults = true\n\n[shortcuts.bindings]\n\"alt+shift+b\" = \"balance\"\n",
+    );
+    temp.write(&source);
 
     // Verify example config parses cleanly through all read commands
     assert_eq!(temp.run(&["config", "check", "--json"]).exit_code, 0);
@@ -661,9 +667,10 @@ fn edits_preserve_other_sections_and_named_rule_workspaces_appear_in_list() {
         parsed.disposition("com.granola.app", &sample_window(None)),
         WindowDisposition::Ignored
     );
-    // The example's [shortcuts] table survives every edit above.
+    // The appended [shortcuts] table survives every edit above.
     assert!(parsed.shortcuts().defaults);
-    assert_eq!(parsed.shortcuts().bindings.len(), 5);
+    assert_eq!(parsed.shortcuts().bindings.len(), 1);
+    assert_eq!(parsed.shortcuts().bindings[0].source, "alt+shift+b");
 
     // Named workspace W (only referenced by a rule) appears in workspaces list with default main
     let workspaces: Value = serde_json::from_str(

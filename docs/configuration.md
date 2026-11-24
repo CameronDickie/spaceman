@@ -122,7 +122,7 @@ to a command in `spaceman ctl` syntax:
 defaults = true                       # optional (default: true); false registers only these bindings
 
 [shortcuts.bindings]
-"alt+left" = "move-direction left"
+"alt+left" = "move-direction left"     # replaces macOS's Option+arrow word jump everywhere
 "alt+shift+ctrl+left" = "focus left"
 "alt+v" = "float"
 "alt+j" = "layout"                    # replaces the built-in Option+J (focus down)
@@ -159,6 +159,10 @@ Commands:
 | `retile` | Retile now |
 | `none` | Unbind the chord: no built-in shortcut claims it |
 
+A global shortcut fires in every app, so a chord that types something takes that key everywhere:
+`alt+left` replaces macOS's Option+arrow word jump in text fields. Prefer `ctrl` or `alt+shift` for
+rebinds that must not disturb typing.
+
 Bindings claim their chords before the built-in shortcuts, so a binding on a built-in chord replaces
 it and the other built-ins stay. With `defaults = false` only the listed bindings register, and the
 table must bind at least one command (tiling needs at least one shortcut to start). Two spellings of
@@ -167,7 +171,8 @@ config error. A binding whose workspace is not enabled, or that the keyboard lay
 skipped and logged in `agent.log` while the other shortcuts register.
 
 Shortcut changes take effect the next time Spaceman starts (`spaceman ctl restart`); rules, displays,
-and the HUD still reload live. Settings › Shortcuts lists the built-in shortcuts.
+and the HUD still reload live. Settings › Shortcuts lists the built-in shortcuts, and the menu-bar
+workspace list keeps showing the built-in `Option`+number/letter hints next to each workspace.
 
 ## Remembered Placements
 
